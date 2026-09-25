@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartStudentPantry — Groceries Delivered to Campus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+/* === BASE CSS === */
+:root { --bg: #FAFAF8; --surface: #FFFFFF; --surface-2: #F4F3EF; --surface-3: #ECEAE4; --border: rgba(0,0,0,0.08); --border-md: rgba(0,0,0,0.14); --text: #111110; --text-2: #4A4A47; --text-3: #888884; --accent: #2D6A4F; --accent-light: #D8F3DC; --accent-mid: #52B788; --accent-hover: #1B4332; --warm: #D4622A; --warm-light: #FDF0E8; --gold: #B5863A; --gold-light: #FDF6E7; --radius-sm: 6px; --radius: 12px; --radius-lg: 18px; --radius-xl: 28px; --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); --shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); --shadow-lg: 0 12px 40px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06); --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1); }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+h1,h2,h3,h4,h5 { font-family: 'Sora', sans-serif; line-height: 1.2; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes popIn { 0% { transform: scale(0); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+.anim-fade-up { animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) forwards; }
+.anim-scale-in { animation: scaleIn 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.section { padding: 72px 0; }
+.section-title { font-size: clamp(26px, 3.5vw, 38px); font-weight: 800; letter-spacing: -0.03em; color: var(--text); margin-bottom: 32px;}
+.section-subtitle { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin: 40px 0 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+/* Buttons & Tags */
+.tag { display: inline-flex; align-items: center; gap: 6px; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 12px; border-radius: 100px; }
+.tag-green { background: var(--accent-light); color: var(--accent); }
+.tag-warm { background: var(--warm-light); color: var(--warm); }
+.tag-gold { background: var(--gold-light); color: var(--gold); }
+.tag-neutral { background: var(--surface-3); color: var(--text-2); }
+.badge-popular { position: absolute; top: 14px; left: 14px; background: var(--warm); color: #fff; font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; z-index: 2; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; transition: all var(--transition); border-radius: var(--radius); padding: 12px 24px; white-space: nowrap; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,106,79,0.30); }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1.5px solid var(--border-md); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--text-2); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: var(--border-md); }
+
+/* Navbar */
+.navbar { position: sticky; top: 0; z-index: 100; background: rgba(250,250,248,0.92); backdrop-filter: blur(20px) saturate(1.2); border-bottom: 1px solid var(--border); }
+.navbar-inner { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+.logo { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -0.03em; cursor: pointer; text-decoration: none; }
+.logo span { color: var(--accent); }
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.cart-btn { position: relative; background: var(--surface); border: 1.5px solid var(--border-md); border-radius: var(--radius); padding: 9px 16px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; transition: all var(--transition); }
+.cart-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.cart-count { background: var(--warm); color: #fff; font-size: 10px; font-weight: 700; font-family: 'Sora', sans-serif; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.user-greeting { font-size: 14px; font-weight: 600; margin-right: 8px; color: var(--text); }
+.logout-btn { font-size: 12px; color: var(--warm); background: none; border: none; cursor: pointer; font-weight: 600; margin-right: 16px; }
+
+/* Hero */
+.hero { padding: 80px 0 60px; position: relative; overflow: hidden; }
+.hero-title { font-size: clamp(36px, 5vw, 58px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.08; color: var(--text); margin: 16px 0; }
+.hero-title em { font-style: normal; color: var(--accent); }
+.hero-sub { font-size: 17px; color: var(--text-2); line-height: 1.65; max-width: 440px; }
+
+/* Product Grid */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+.product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: all var(--transition); display: flex; flex-direction: column; cursor: pointer; }
+.product-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); border-color: transparent; }
+.product-img { height: 200px; overflow: hidden; position: relative; background: var(--surface-2); }
+.product-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+.product-card:hover .product-img img { transform: scale(1.05); }
+.product-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+.product-cat { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+.product-name { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 14px; line-height: 1.3; flex: 1;}
+.product-footer { display: flex; align-items: center; justify-content: space-between; }
+.product-price { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.03em; }
+
+/* Micro-Animation for Quick Add */
+.btn-view { background: var(--surface-2); color: var(--text-2); font-size: 12px; font-weight: 700; font-family: 'DM Sans', sans-serif; border: none; border-radius: var(--radius-sm); padding: 8px 14px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.btn-view:hover { background: var(--border-md); color: var(--text); }
+.btn-view.added-anim { background: var(--accent) !important; color: white !important; transform: scale(0.92); }
+
+/* Product Details View */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; max-width: 1000px; margin: 0 auto;}
+.detail-image-wrap { border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-sm); aspect-ratio: 4/3; }
+.detail-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.detail-title { font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.03em; }
+.detail-desc { font-size: 15px; color: var(--text-2); margin-bottom: 24px; line-height: 1.7; }
+.includes-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 32px; }
+.includes-list h4 { margin-bottom: 16px; font-size: 16px; }
+.includes-list ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.includes-list li { font-size: 14px; color: var(--text-2); display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+.includes-list li::before { content: '•'; color: var(--accent); font-weight: bold; }
+.back-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-3); margin-bottom: 32px; cursor: pointer; transition: color 0.2s; }
+.back-link:hover { color: var(--accent); }
+
+/* Cart & Checkout */
+.cart-wrap { max-width: 680px; margin: 0 auto; }
+.cart-item { display: flex; align-items: center; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+.cart-item-img { width: 72px; height: 72px; border-radius: var(--radius); object-fit: cover; flex-shrink: 0; }
+.cart-item-name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+.cart-item-price { font-size: 14px; color: var(--accent); font-weight: 600; }
+.qty-ctrl { display: flex; align-items: center; gap: 0; border: 1.5px solid var(--border-md); border-radius: var(--radius-sm); overflow: hidden; margin-left: auto; }
+.qty-btn { background: none; border: none; cursor: pointer; width: 36px; height: 36px; font-size: 17px; font-weight: 600; color: var(--text-2); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
+.qty-btn:hover { background: var(--surface-2); color: var(--text); }
+.qty-num { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px; padding: 0 12px; min-width: 40px; text-align: center; }
+.cart-summary { background: var(--surface-2); border-radius: var(--radius-lg); padding: 24px 28px; margin-top: 28px; }
+.cart-total-val { font-family: 'Sora', sans-serif; font-size: 38px; font-weight: 800; letter-spacing: -0.04em; color: var(--text); }
+.checkout-btn { width: 100%; background: var(--text); color: #fff; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; padding: 17px; border: none; border-radius: var(--radius-lg); cursor: pointer; transition: all var(--transition); margin-top: 18px; letter-spacing: -0.01em; }
+.checkout-btn:hover { background: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); font-size: 15px; }
+
+/* Success Screen Animation */
+.success-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 20px; }
+.success-icon { width: 80px; height: 80px; background: var(--accent-light); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 24px; animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; transform: scale(0); }
+.success-title { font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+
+/* Login / Forms */
+.login-wrap { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 44px 40px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); }
+.form-group { margin-bottom: 18px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+.form-input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-md); border-radius: var(--radius); background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none; }
+.form-input:focus { border-color: var(--accent); background: var(--surface); }
+
+/* Checkout View */
+.checkout-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; max-width: 1000px; margin: 0 auto; align-items: start;}
+.checkout-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-sm); margin-bottom: 24px;}
+.checkout-panel-title { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);}
+.order-summary-item { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; color: var(--text-2);}
+.order-summary-item span:last-child { font-weight: 600; color: var(--text);}
+.order-total { display: flex; justify-content: space-between; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+.free-delivery { color: var(--accent) !important; font-weight: 800 !important; }
+
+/* Subscriptions CSS */
+.stagger-1 { animation-delay: 0.1s; } .stagger-2 { animation-delay: 0.2s; } .stagger-3 { animation-delay: 0.3s; }
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; max-width: 1000px; margin: 0 auto; }
+.pricing-card { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius-xl); padding: 40px 32px; text-align: center; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; opacity: 0; cursor: pointer;}
+.pricing-card:hover { transform: translateY(-8px); border-color: var(--accent-mid); box-shadow: var(--shadow-lg); }
+.pricing-card.premium { border-color: var(--accent); background: var(--accent-light); }
+.pricing-card.premium::before { content: 'Most Popular'; position: absolute; top: 16px; right: -32px; background: var(--accent); color: white; font-size: 11px; font-weight: 700; font-family: 'Sora', sans-serif; padding: 4px 40px; transform: rotate(45deg); text-transform: uppercase; letter-spacing: 0.1em; }
+.pricing-title { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+.pricing-price { font-family: 'Sora', sans-serif; font-size: 48px; font-weight: 800; color: var(--text); letter-spacing: -0.04em; margin-bottom: 24px; }
+.pricing-price span { font-size: 16px; color: var(--text-3); font-weight: 500; letter-spacing: 0; }
+
+@media (max-width: 768px) {
+  .checkout-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .nav-links { display: none !important; }
+  .includes-list ul { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// 1. MONTHLY BOXES 
+const MONTHLY_BOXES = [
+  {
+    id: 1,
+    name: "The Monthly Survivor Box",
+    category: "Monthly Box",
+    price: 550,
+    popular: true,
+    image: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop", 
+    description: "Everything a student needs to survive the month without worrying about grocery shopping. Built around high-energy bulk staples to stretch your budget.",
+    includes: ["10kg Maize Meal", "5kg White Rice", "2kg Brown Sugar", "10x Canned Baked Beans (410g)", "10x Canned Pilchards (400g)", "2L Cooking Oil", "100x Tagless Tea Bags", "2.5kg Potatoes", "1kg Onions", "1kg Salt"]
+  },
+  {
+    id: 2,
+    name: "The Healthy Scholar Box",
+    category: "Monthly Box",
+    price: 750,
+    popular: false,
+    image: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800",
+    description: "Nutrient-dense whole foods to keep your brain and body fueled for high performance. Packed with proteins and healthy fats for a full 30 days.",
+    includes: ["5kg Brown Rice", "3kg Rolled Oats", "6x 1L Long-life Milk", "10x Canned Tuna in Water", "2kg Lentils & Soup Mix", "1kg Smooth Peanut Butter", "Tray of 30 Large Eggs", "2L Canola Oil", "Wholewheat Pasta (2x 500g)", "Mixed Fresh Fruit Pack"]
+  }
+];
+
+// 2. WEEKLY TOP-UPS 
+const WEEKLY_BOXES = [
+  {
+    id: 3,
+    name: "Week-Prep Essentials",
+    category: "Weekly Box",
+    price: 180,
+    popular: true,
+    image: "https://images.pexels.com/photos/3962294/pexels-photo-3962294.jpeg?auto=compress&cs=tinysrgb&w=800",
+    description: "Perfect for getting through Monday to Friday. Fresh perishables delivered at the start of the week.",
+    includes: ["1x Loaf of Brown Bread", "2L Fresh Milk", "12x Large Eggs", "1kg Apples or Bananas", "500g Cheddar Cheese"]
+  },
+  {
+    id: 4,
+    name: "Mid-Term Booster",
+    category: "Weekly Box",
+    price: 220,
+    popular: false,
+    image: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?q=80&w=800&auto=format&fit=crop", 
+    description: "When assignments pile up and you have zero time to cook. Quick fuel to keep you pushing.",
+    includes: ["4x Energy Drinks (500ml)", "5x Instant Microwave Meals", "500g Study Trail Mix (Nuts & Raisins)", "2x Chocolate Slabs"]
+  }
+];
+
+// 3. DAILY MEALS 
+const DAILY_MEALS = [
+  {
+    id: 5,
+    name: "Study Night Hot Meal",
+    category: "Daily Meal",
+    price: 65,
+    popular: true,
+    image: "https://images.pexels.com/photos/1437267/pexels-photo-1437267.jpeg?auto=compress&cs=tinysrgb&w=800",
+    description: "A hearty, pre-cooked microwaveable meal delivered hot for those long nights of studying.",
+    includes: ["1x Large Pre-cooked Beef Lasagne", "1x Garlic Roll", "1x Soft Drink (330ml)"]
+  },
+  {
+    id: 6,
+    name: "Breakfast On-The-Go",
+    category: "Daily Meal",
+    price: 45,
+    popular: false,
+    image: "https://images.unsplash.com/photo-1493770348161-369560ae357d?q=80&w=800&auto=format&fit=crop", 
+    description: "Grab and go before your 8 AM lecture. Freshly packed every morning.",
+    includes: ["1x Large Bran Muffin", "1x Fresh Orange Juice (330ml)", "1x Fresh Banana", "1x Filter Coffee Cup"]
+  }
+];
+
+// 4. ADD-ONS
+const ADD_ONS = [
+  {
+    id: 7,
+    name: "Midnight Noodles Bundle",
+    category: "Add-on",
+    price: 75,
+    image: "https://images.pexels.com/photos/2664216/pexels-photo-2664216.jpeg?auto=compress&cs=tinysrgb&w=800",
+    description: "A bulk pack of quick 2-minute noodles for when the dining hall is closed.",
+    includes: ["10x Assorted Flavor Noodles (Chicken, Beef, Cheese)"]
+  },
+  {
+    id: 8,
+    name: "Campus Coffee & Rusks",
+    category: "Add-on",
+    price: 95,
+    image: "https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=800",
+    description: "The classic South African student morning combo.",
+    includes: ["500g Ouma Buttermilk Rusks", "100g Premium Instant Coffee"]
+  }
+];
+
+// FULL SUBSCRIPTION DATA
+const SUBSCRIPTIONS = [
+  {
+    id: "sub_basic",
+    name: "Basic Survival Plan",
+    category: "Monthly Plan",
+    price: 500,
+    image: "https://images.unsplash.com/photo-1593946148866-e889b917ffb4?q=80&w=800&auto=format&fit=crop", // FIX: 100% active Unsplash link of canned food shelves
+    description: "Automate your essential dry goods. Every month, we drop off the absolute essentials directly to your res so you never run out of the basics. Cancel anytime.",
+    includes: ["5kg Maize Meal", "2kg Rice", "5x Canned Baked Beans", "5x Canned Pilchards", "1L Cooking Oil", "Sugar & Bulk Tea bags"],
+    isSubscription: true
+  },
+  {
+    id: "sub_premium",
+    name: "The Full Pantry Plan",
+    category: "Monthly Plan",
+    price: 950,
+    popular: true,
+    image: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop", // FIX: 100% active Unsplash link of a giant grocery delivery bag
+    description: "A complete grocery replacement on autopilot. Bulk dry goods and premium study snacks dropped off every 4 weeks with free delivery.",
+    includes: ["5kg Rice & 3kg Oats", "10x Assorted Canned Proteins", "6x 1L Long Life Milk", "Study Snack Box (Nuts, Energy bars)", "Tray of 30 Eggs", "Priority Same-Day Support"],
+    isSubscription: true
+  },
+  {
+    id: "sub_semester",
+    name: "Semester Pass",
+    category: "Semester Plan",
+    price: 3800,
+    image: "https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=800",
+    description: "Pay once and eat for 4 months. A massive upfront bulk drop, followed by fresh top-ups so you never have to think about groceries during exams.",
+    includes: ["Mega Bulk Dry Goods (20kg Rice/Maize)", "Free SmartStudent Hoodie", "Bi-weekly fresh top-ups (Eggs, Milk, Veg)", "Guaranteed price lock for the year"],
+    isSubscription: true
+  }
+];
+
+const App = () => {
+  const [view, setView] = useState('shop'); 
+  const [cart, setCart] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null); 
+  const [addedAnimId, setAddedAnimId] = useState(null); 
+  
+  const [authView, setAuthView] = useState('login'); 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [user, setUser] = useState(null); 
+
+  const [address, setAddress] = useState('');
+  const [roomNumber, setRoomNumber] = useState('');
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('pantry_user');
+    if (savedUser) setUser(JSON.parse(savedUser));
+  }, []);
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:9090/api/students/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, password }),
+      });
+      if (response.ok) {
+        const newUser = await response.json();
+        setUser(newUser);
+        localStorage.setItem('pantry_user', JSON.stringify(newUser));
+        setView(cart.length > 0 ? 'checkout' : 'shop');
+      } else {
+        alert("Registration failed. Email might already exist.");
+      }
+    } catch (error) {
+      alert("Could not connect to the Spring Boot server.");
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:9090/api/students/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (response.ok) {
+        const loggedInUser = await response.json();
+        setUser(loggedInUser);
+        localStorage.setItem('pantry_user', JSON.stringify(loggedInUser)); 
+        setView(cart.length > 0 ? 'checkout' : 'shop');
+      } else {
+        alert("Invalid email or password.");
+      }
+    } catch (error) {
+      alert("Could not connect to the Spring Boot server.");
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('pantry_user');
+    setView('shop');
+  };
+
+  const handleQuickAdd = (e, product) => {
+    e.stopPropagation(); 
+    setAddedAnimId(product.id);
+    
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map(item => item.id === product.id ? { ...item, qty: item.qty + 1 } : item);
+      }
+      return [...prevCart, { ...product, qty: 1 }];
+    });
+
+    setTimeout(() => setAddedAnimId(null), 1000);
+  };
+
+  const handleSubscribe = (plan) => {
+    setCart([{ ...plan, qty: 1 }]);
+    if (!user) {
+      setView('auth');
+    } else {
+      setView('checkout');
+    }
+  };
+
+  const openProductDetail = (product) => {
+    setSelectedProduct(product);
+    setView('product_detail');
+  };
+
+  const updateQuantity = (id, delta) => {
+    setCart(prevCart => prevCart.map(item => {
+        if (item.id === id) {
+          const newQty = item.qty + delta;
+          return newQty > 0 ? { ...item, qty: newQty } : null;
+        }
+        return item;
+      }).filter(Boolean)
+    );
+  };
+
+  // SMART DELIVERY FEE CALCULATION
+  const hasSubscription = cart.some(item => item.category.includes('Plan'));
+  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  const deliveryFee = hasSubscription ? 0 : 20; 
+
+  const proceedToCheckout = () => {
+    if (!user) {
+      setView('auth');
+    } else {
+      setView('checkout');
+    }
+  };
+
+  const handlePlaceOrder = async (e) => {
+    e.preventDefault();
+
+    if (!user || !user.id) {
+      alert("Session lost. Please log in again.");
+      setView('auth');
+      return;
+    }
+
+    // Format the payload to exactly match our Spring Boot OrderRequest DTO
+    const orderPayload = {
+      studentId: user.id,
+      deliveryAddress: `${address}, Room/Block: ${roomNumber}`,
+      totalAmount: cartTotal + deliveryFee,
+      cartItems: cart.map(item => ({
+        name: item.name,
+        qty: item.qty,
+        price: item.price,
+        isSubscription: item.isSubscription || false
+      }))
+    };
+
+    try {
+      const response = await fetch('http://localhost:9090/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
+      });
+
+      if (response.ok) {
+        setCart([]); // Empty the cart
+        setView('success'); // Show the success animation screen
+      } else {
+        alert("There was an issue processing your order with the database.");
+      }
+    } catch (error) {
+      console.error("Order error:", error);
+      alert("Could not connect to the backend server. Make sure Spring Boot is running.");
+    }
+  };
+
+  return (
+    <div className="app-container">
+      <nav className="navbar">
+        <div className="container navbar-inner">
+          <a href="#" className="logo" onClick={(e) => { e.preventDefault(); setView('shop'); }}>
+            SmartStudent<span>Pantry</span>
+          </a>
+
+          <div className="nav-links" style={{ display: 'flex', gap: '24px', marginLeft: '32px', flex: 1, justifyContent: 'center' }}>
+            <a href="#" onClick={(e) => { e.preventDefault(); setView('shop'); }} style={{ textDecoration: 'none', color: view === 'shop' ? 'var(--accent)' : 'var(--text-2)', fontWeight: '600' }}>Pantry Shop</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setView('subscriptions'); }} style={{ textDecoration: 'none', color: view === 'subscriptions' ? 'var(--accent)' : 'var(--text-2)', fontWeight: '600' }}>Meal Plans</a>
+          </div>
+
+          <div className="nav-actions">
+            {user ? (
+              <>
+                <span className="user-greeting">Hi, {user.fullName.split(' ')[0]} 👋</span>
+                <button className="logout-btn" onClick={handleLogout}>Log out</button>
+              </>
+            ) : (
+              <button className="btn btn-ghost btn-sm" onClick={() => setView('auth')}>Sign In</button>
+            )}
+            <button className="cart-btn" onClick={() => setView('cart')}>
+              Cart <span className="cart-count">{cart.reduce((sum, item) => sum + item.qty, 0)}</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* SHOP VIEW */}
+      {view === 'shop' && (
+        <main className="anim-fade-up">
+          <section className="hero container">
+            <div className="hero-grid">
+              <div>
+                <div className="hero-eyebrow tag tag-green">Campus Delivery</div>
+                <h1 className="hero-title">Groceries Delivered to <em>Campus</em></h1>
+                <p className="hero-sub">Get your essential monthly survival boxes, weekly top-ups, and daily hot meals delivered right to your res.</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="section container" style={{paddingTop: '0'}}>
+            
+            <h2 className="section-subtitle">Monthly Survival Boxes</h2>
+            <div className="product-grid">
+              {MONTHLY_BOXES.map(product => (
+                <div key={product.id} className="product-card" onClick={() => openProductDetail(product)}>
+                  <div className="product-img">
+                    {product.popular && <span className="badge-popular">Popular</span>}
+                    <img src={product.image} alt={product.name} />
+                  </div>
+                  <div className="product-body">
+                    <span className="product-cat tag-green tag" style={{width: 'fit-content', marginBottom: '8px'}}>{product.category}</span>
+                    <h3 className="product-name">{product.name}</h3>
+                    <div className="product-footer">
+                      <div className="product-price">R{product.price}</div>
+                      <button className={`btn-view ${addedAnimId === product.id ? 'added-anim' : ''}`} onClick={(e) => handleQuickAdd(e, product)}>
+                        {addedAnimId === product.id ? '✓ Added' : 'Quick Add'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <h2 className="section-subtitle">Weekly Top-Up Boxes</h2>
+            <div className="product-grid">
+              {WEEKLY_BOXES.map(product => (
+                <div key={product.id} className="product-card" onClick={() => openProductDetail(product)}>
+                  <div className="product-img">
+                    {product.popular && <span className="badge-popular">Popular</span>}
+                    <img src={product.image} alt={product.name} />
+                  </div>
+                  <div className="product-body">
+                    <span className="product-cat tag-warm tag" style={{width: 'fit-content', marginBottom: '8px'}}>{product.category}</span>
+                    <h3 className="product-name">{product.name}</h3>
+                    <div className="product-footer">
+                      <div className="product-price">R{product.price}</div>
+                      <button className={`btn-view ${addedAnimId === product.id ? 'added-anim' : ''}`} onClick={(e) => handleQuickAdd(e, product)}>
+                        {addedAnimId === product.id ? '✓ Added' : 'Quick Add'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <h2 className="section-subtitle">Daily Meals & Essentials</h2>
+            <div className="product-grid">
+              {DAILY_MEALS.map(product => (
+                <div key={product.id} className="product-card" onClick={() => openProductDetail(product)}>
+                  <div className="product-img">
+                    {product.popular && <span className="badge-popular">Popular</span>}
+                    <img src={product.image} alt={product.name} />
+                  </div>
+                  <div className="product-body">
+                    <span className="product-cat tag-gold tag" style={{width: 'fit-content', marginBottom: '8px'}}>{product.category}</span>
+                    <h3 className="product-name">{product.name}</h3>
+                    <div className="product-footer">
+                      <div className="product-price">R{product.price}</div>
+                      <button className={`btn-view ${addedAnimId === product.id ? 'added-anim' : ''}`} onClick={(e) => handleQuickAdd(e, product)}>
+                        {addedAnimId === product.id ? '✓ Added' : 'Quick Add'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <h2 className="section-subtitle">Optional Add-ons</h2>
+            <div className="product-grid">
+              {ADD_ONS.map(product => (
+                <div key={product.id} className="product-card" onClick={() => openProductDetail(product)}>
+                  <div className="product-img">
+                    <img src={product.image} alt={product.name} />
+                  </div>
+                  <div className="product-body">
+                    <span className="product-cat tag-neutral tag" style={{width: 'fit-content', marginBottom: '8px'}}>{product.category}</span>
+                    <h3 className="product-name">{product.name}</h3>
+                    <div className="product-footer">
+                      <div className="product-price">R{product.price}</div>
+                      <button className={`btn-view ${addedAnimId === product.id ? 'added-anim' : ''}`} onClick={(e) => handleQuickAdd(e, product)}>
+                        {addedAnimId === product.id ? '✓ Added' : 'Quick Add'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          </section>
+        </main>
+      )}
+
+      {/* PRODUCT & SUBSCRIPTION DETAILS VIEW */}
+      {view === 'product_detail' && selectedProduct && (
+        <main className="container section anim-fade-up">
+          <div className="back-link" onClick={() => setView(selectedProduct.isSubscription ? 'subscriptions' : 'shop')}>
+            ← Back to {selectedProduct.isSubscription ? 'Plans' : 'Shop'}
+          </div>
+          <div className="detail-grid">
+            <div className="detail-image-wrap">
+              <img src={selectedProduct.image} alt={selectedProduct.name} />
+            </div>
+            <div>
+              <span className="tag tag-green" style={{marginBottom: '16px'}}>{selectedProduct.category}</span>
+              <h1 className="detail-title">{selectedProduct.name}</h1>
+              <div className="product-price" style={{fontSize: '32px', marginBottom: '24px'}}>
+                R{selectedProduct.price} {selectedProduct.isSubscription && <span style={{fontSize: '16px', color: 'var(--text-3)'}}>/mo</span>}
+              </div>
+              
+              <p className="detail-desc">{selectedProduct.description}</p>
+
+              {selectedProduct.includes && (
+                <div className="includes-list">
+                  <h4>What's included in this package:</h4>
+                  <ul>
+                    {selectedProduct.includes.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {selectedProduct.isSubscription ? (
+                <button className="btn btn-primary btn-lg" style={{width: '100%'}} onClick={() => handleSubscribe(selectedProduct)}>
+                  Select this Plan
+                </button>
+              ) : (
+                <button 
+                  className={`btn btn-lg ${addedAnimId === selectedProduct.id ? 'btn-primary' : 'btn-secondary'}`} 
+                  style={{width: '100%'}} 
+                  onClick={(e) => handleQuickAdd(e, selectedProduct)}
+                >
+                  {addedAnimId === selectedProduct.id ? '✓ Added to Cart' : `Add to Cart — R${selectedProduct.price}`}
+                </button>
+              )}
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* SUBSCRIPTIONS VIEW */}
+      {view === 'subscriptions' && (
+        <main className="container section anim-fade-up">
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <div className="hero-eyebrow tag tag-warm">Zero Delivery Fees</div>
+            <h2 className="section-title" style={{ fontSize: '42px', marginTop: '16px' }}>Student Subscription Plans</h2>
+            <p className="hero-sub" style={{ margin: '0 auto' }}>Set it and forget it. Get essentials delivered to your res automatically every month.</p>
+          </div>
+
+          <div className="pricing-grid">
+            {SUBSCRIPTIONS.map((plan, index) => (
+              <div key={plan.id} className={`pricing-card anim-scale-in stagger-${index + 1} ${plan.popular ? 'premium' : ''}`} onClick={() => openProductDetail(plan)}>
+                <h3 className="pricing-title">{plan.name}</h3>
+                <div className="pricing-price">R{plan.price}<span>{plan.category === 'Semester Plan' ? '/sem' : '/mo'}</span></div>
+                <ul className="pricing-features">
+                  <li>View full grocery list</li>
+                  <li>Free monthly delivery</li>
+                  <li>Cancel anytime</li>
+                </ul>
+                <button className={`btn ${plan.popular ? 'btn-primary' : 'btn-secondary'}`} style={{ width: '100%' }}>View Plan Details</button>
+              </div>
+            ))}
+          </div>
+        </main>
+      )}
+
+      {/* CART VIEW */}
+      {view === 'cart' && (
+        <main className="container section anim-fade-up">
+          <div className="cart-wrap">
+            <h2 className="section-title">Your Cart</h2>
+            {cart.length === 0 ? (
+              <div className="empty-state">
+                <span className="empty-state-icon">🛒</span>
+                Your cart is empty. Time to fuel up!
+                <br/><br/>
+                <button className="btn btn-primary" onClick={() => setView('shop')}>Browse Pantry</button>
+              </div>
+            ) : (
+              <>
+                {cart.map((item) => (
+                  <div key={item.id} className="cart-item">
+                    <img src={item.image} className="cart-item-img" alt={item.name} />
+                    <div style={{flex: 1}}>
+                      <div className="cart-item-name">{item.name}</div>
+                      <div className="cart-item-price">R{item.price} {item.isSubscription ? '' : 'each'}</div>
+                    </div>
+                    {!item.isSubscription && (
+                      <div className="qty-ctrl">
+                        <button className="qty-btn" onClick={() => updateQuantity(item.id, -1)}>−</button>
+                        <span className="qty-num">{item.qty}</span>
+                        <button className="qty-btn" onClick={() => updateQuantity(item.id, 1)}>+</button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <div className="cart-summary">
+                  <div className="cart-total-label">Subtotal</div>
+                  <div className="cart-total-val">R{cartTotal}</div>
+                  <button className="checkout-btn" onClick={proceedToCheckout}>
+                    Proceed to Checkout
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </main>
+      )}
+
+      {/* AUTH VIEW */}
+      {view === 'auth' && (
+        <div className="login-wrap anim-scale-in">
+          <div className="login-card">
+            <div className="login-logo">
+              SmartStudent<span>Pantry</span>
+            </div>
+            <p className="login-sub">
+              {authView === 'login' ? 'Welcome back! Please enter your details.' : 'Create an account to start shopping.'}
+            </p>
+
+            <form onSubmit={authView === 'login' ? handleLogin : handleRegister}>
+              {authView === 'register' && (
+                <div className="form-group">
+                  <label className="form-label">Full Name</label>
+                  <input type="text" className="form-input" placeholder="e.g. Jane Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                </div>
+              )}
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input type="email" className="form-input" placeholder="name@mycput.ac.za" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input type="password" className="form-input" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              </div>
+              <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: '12px' }}>
+                {authView === 'login' ? 'Sign In' : 'Sign Up'}
+              </button>
+            </form>
+
+            <div className="login-switch">
+              {authView === 'login' ? (
+                <> Don't have an account? <button type="button" onClick={() => setAuthView('register')}>Sign up</button> </>
+              ) : (
+                <> Already have an account? <button type="button" onClick={() => setAuthView('login')}>Log in</button> </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CHECKOUT VIEW */}
+      {view === 'checkout' && (
+        <main className="container section anim-fade-up">
+          <h2 className="section-title">Checkout</h2>
+          
+          <form className="checkout-grid" onSubmit={handlePlaceOrder}>
+            <div>
+              <div className="checkout-panel">
+                <h3 className="checkout-panel-title">Campus Delivery Details</h3>
+                <div className="form-group">
+                  <label className="form-label">Campus / Residence Name</label>
+                  <input type="text" className="form-input" placeholder="e.g. District Six Res" required value={address} onChange={e => setAddress(e.target.value)} />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Room / Block Number</label>
+                    <input type="text" className="form-input" placeholder="e.g. Block B, Room 12" required value={roomNumber} onChange={e => setRoomNumber(e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Phone Number</label>
+                    <input type="tel" className="form-input" placeholder="071 234 5678" required />
+                  </div>
+                </div>
+              </div>
+
+              <div className="checkout-panel">
+                <h3 className="checkout-panel-title">Payment Method</h3>
+                <div className="form-group">
+                  <label className="form-label">Card Number</label>
+                  <input type="text" className="form-input" placeholder="0000 0000 0000 0000" required />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Expiry Date</label>
+                    <input type="text" className="form-input" placeholder="MM/YY" required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">CVV</label>
+                    <input type="text" className="form-input" placeholder="123" required />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="checkout-panel" style={{position: 'sticky', top: '90px'}}>
+                <h3 className="checkout-panel-title">Order Summary</h3>
+                {cart.map((item) => (
+                  <div key={item.id} className="order-summary-item">
+                    <span>{item.qty}x {item.name}</span>
+                    <span>R{item.price * item.qty}</span>
+                  </div>
+                ))}
+                
+                <div className="order-summary-item" style={{marginTop: '20px'}}>
+                  <span>Delivery Fee</span>
+                  <span className={hasSubscription ? 'free-delivery' : ''}>
+                    {hasSubscription ? 'FREE' : `R${deliveryFee}`}
+                  </span>
+                </div>
+                
+                <div className="order-total">
+                  <span>Total</span>
+                  <span>R{cartTotal + deliveryFee}</span>
+                </div>
+                
+                {hasSubscription && (
+                  <p style={{fontSize: '12px', color: 'var(--text-3)', marginTop: '8px', lineHeight: '1.4'}}>
+                    ✓ Subscription plans include free campus delivery.
+                  </p>
+                )}
+
+                <button type="submit" className="checkout-btn">Complete Order</button>
+                <button type="button" className="btn btn-ghost" style={{width: '100%', marginTop: '12px'}} onClick={() => setView('cart')}>Back to Cart</button>
+              </div>
+            </div>
+          </form>
+        </main>
+      )}
+
+      {/* SUCCESS CONFIRMATION VIEW */}
+      {view === 'success' && (
+        <main className="container anim-fade-up">
+          <div className="success-wrap">
+            <div className="success-icon">✓</div>
+            <h2 className="success-title">Order Confirmed!</h2>
+            <p className="hero-sub" style={{marginBottom: '32px'}}>
+              Your pantry order has been successfully placed. We're packing it up and will deliver it to <strong>{address}</strong> soon.
+            </p>
+            <button className="btn btn-primary btn-lg" onClick={() => setView('shop')}>
+              Return to Pantry
+            </button>
+          </div>
+        </main>
+      )}
+
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
